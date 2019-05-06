@@ -3,17 +3,26 @@ import cv2
 import dlib
 import numpy as np
 import Detector_PERCLOS
+import time
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("..\\tools\\shape_predictor_68_face_landmarks.dat")
 
-#read images 可放至周家红
-def read_images():
-	img_list = []
-	for filename in os.listdir("..\\images\\"):
-		img = cv2.imread("..\\images\\"+filename)
-		img_list.append(img)
-	return img_list
+time_fatigue = {}
+datetime = time.strftime("%Y-%m-%d",time.localtime())
+time_fatigue['datetime'] = datetime # 添加
+# print(time_fatigue)
+# print(datetime)
+# print(time.strftime("%X",time.localtime()))
+# 2016-10-26 16:48:41
+
+# #read images 可放至周家红
+# def read_images():
+# 	img_list = []
+# 	for filename in os.listdir("..\\images\\"):
+# 		img = cv2.imread("..\\images\\"+filename)
+# 		img_list.append(img)
+# 	return img_list
 
 #特征点--眼睛坐标数据
 def detector_eyes(img):
@@ -48,6 +57,11 @@ def deal(img_list):
 	#疲劳度计算
 	fatigue = close_eyes_num/len(img_list)
 	fatigue_flag=0
+	#
+
+	
+	now_time = time.strftime("%Y-%m-%d",time.localtime())
+	time_fatigue['now_time'] = fatigue # 添加
 
 	if fatigue < 0.3:
 		fatigue_flag =0
@@ -56,12 +70,11 @@ def deal(img_list):
 	else:
 		fatigue_flag = 1
 
-	# print(data_eyes,fatigue,fatigue_flag,len(img_list))
-	return data_eyes,fatigue,fatigue_flag
+	return fatigue_flag
 
 
 
-if __name__ == '__main__':
-	imgs = read_images()
-	c,a,b=deal(imgs)
-	print(a,b)
+# if __name__ == '__main__':
+# 	imgs = read_images()
+# 	c,a,b=deal(imgs)
+# 	print(a,b)
