@@ -2,37 +2,19 @@ import os
 import cv2
 import dlib
 import numpy as np
-import Detector_PERCLOS
+from scipy.spatial import distance as dist
 import time
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("..\\tools\\shape_predictor_68_face_landmarks.dat")
 
-time_fatigue = {}
-datetime = time.strftime("%Y-%m-%d",time.localtime())
-time_fatigue['datetime'] = datetime # 添加
-# print(time_fatigue)
-# print(datetime)
-# print(time.strftime("%X",time.localtime()))
-# 2016-10-26 16:48:41
-
-# #read images 可放至周家红
-# def read_images():
-# 	img_list = []
-# 	for filename in os.listdir("..\\images\\"):
-# 		img = cv2.imread("..\\images\\"+filename)
-# 		img_list.append(img)
-# 	return img_list
-
 #特征点--眼睛坐标数据
 def detector_eyes(img):
-    # img = cv2.imread("6.jpg")
     #使用detector进行人脸检测 rects为返回的结果
     rects = detector(img,0)
     if(rects):        
         #使用predictor进行人脸关键点识别
         landmarks = np.matrix([[p.x,p.y] for p in predictor(img,rects[0]).parts()])
-        # img = img.copy()
         eyeList=[]
         #使用enumerate 函数遍历序列中的元素以及它们的下标
         for idx,point in enumerate(landmarks):
@@ -42,26 +24,48 @@ def detector_eyes(img):
     else:
         return []
 
+#两特征点距离
+def is_close(eye,threshold):
+	# 计算两组垂直眼标之间的距离
+	A = dist.euclidean(eye[1], eye[5])
+	B = dist.euclidean(eye[2], eye[4])
+	# 计算水平眼标间的距离
+	C = dist.euclidean(eye[0], eye[3])
+	# 计算眼镜纵横比
+	ear = (A + B) / (2.0 * C)
+	# print(ear)
+	if ear < threshold:
+		return True
+
+#闭眼判断
+def close_count(eyes, threshold):
+	count = 0
+	for eye in eyes:
+		right = eye[0:6]
+		left = eye[6:12]
+		
+		if is_close(right,threshold) and is_close(left,threshold):
+			count += 1
+	return count
+
 #deal images 以及 疲劳度计算
 def deal(img_list):
 	data_eyes = []
+	time_fatigue = {}
 	for imgfile in img_list:
 		eyes_list = detector_eyes(imgfile)
 		if(eyes_list):
 			data_eyes.append(eyes_list)
 
-	#判断闭眼睛图片数量n    #陈浩
-	close_eyes_num = Detector_PERCLOS.close_count(data_eyes, 0.2)
-	# print(close_eyes_num)
+	#判断闭眼睛图片数量n  
+	close_eyes_num = close_count(data_eyes, 0.2)
 
 	#疲劳度计算
-	fatigue = close_eyes_num/len(img_list)
 	fatigue_flag=0
-	#
-
+	fatigue = close_eyes_num/len(img_list)	
 	
-	now_time = time.strftime("%Y-%m-%d",time.localtime())
-	time_fatigue['now_time'] = fatigue # 添加
+	now_time = time.strftime("%X",time.localtime())
+	time_fatigue[now_time] = fatigue # 添加
 
 	if fatigue < 0.3:
 		fatigue_flag =0
@@ -70,11 +74,21 @@ def deal(img_list):
 	else:
 		fatigue_flag = 1
 
-	return fatigue_flag
+	return fatigue_flag,time_fatigue
 
 
+
+
+
+# #read images 可放至周家红
+# def read_images():
+# 	img_list = []
+# 	for filename in os.listdir("..\\images\\"):
+# 		img = cv2.imread("..\\images\\"+filename)
+# 		img_list.append(img)
+# 	return img_list
 
 # if __name__ == '__main__':
 # 	imgs = read_images()
-# 	c,a,b=deal(imgs)
+# 	a,b=deal(imgs)
 # 	print(a,b)
