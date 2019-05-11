@@ -16,7 +16,7 @@ def voice_warning(a):
 	time.sleep(10)
 	mixer.music.stop()
 
-warning(2)
+# warning(2)
 
 
 
