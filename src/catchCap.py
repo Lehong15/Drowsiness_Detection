@@ -26,7 +26,7 @@ def Read_Video():
 			if(c%timeF == 0): #每隔timeF帧进行存储操作 
 				image_List.append(image)
 			c = c + 1
-			print(c)
+			# print(c)
 			
 			#cv2.imwrite('E:\\save\\drowsy_driver\\result_image\\' + str(len(image_List)) + '.jpg',image) #存储为图像
 		
@@ -38,7 +38,7 @@ def Read_Video():
 			
 			fatigue_flag,f = FD.deal(image_List)
 			change_timedictiondry(f)
-			print(fatigue_flag)
+			# print(fatigue_flag)
 			#陈浩返回该驾驶员未超时的bollen值
 			#判断是否报警fatigue_flag
 			
@@ -51,11 +51,11 @@ def Read_Video():
 
 def change_timedictiondry(a):
 	time_fatigue.update(a)
-	print(time_fatigue)
+	# print(time_fatigue)
 
 def change_rval():
 	rval = not rval
 
 
-if __name__ == "__main__":
-	Read_Video()
+# if __name__ == "__main__":
+# 	Read_Video()
